@@ -24,6 +24,15 @@
     },
     "types": ["bun-types"]
   },
-  "include": ["src/**/*.ts", "types/**/*.ts", "examples/**/*.ts", "tests/**/*.ts"],
-  "exclude": ["node_modules", "out"]
+  "include": ["src/**/*.ts", "types/**/*.ts", "tests/**/*.test.ts"],
+  "exclude": [
+    "node_modules",
+    "out",
+    "dist",
+    "examples",
+    "tests/contracts",
+    "tests/fixtures",
+    "plugins",
+    "scripts"
+  ]
 }

@@ -23,8 +23,8 @@ export interface ToolResolution {
   cmd: string;
   /** args to prepend (for docker runs); usually empty for native */
   argPrefix: string[];
-  /** "native" | "system-path" | "docker" */
-  via: "native" | "system-path" | "docker";
+  /** how the tool was resolved */
+  via: "native" | "system-path" | "docker" | "pipx";
   /** human-readable for logging */
   description: string;
 }
