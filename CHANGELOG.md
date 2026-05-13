@@ -4,6 +4,12 @@ All notable changes to SolidScript follow [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-05-13
+
+### Fixed
+- `solidscript --version` now reads from `package.json` at runtime instead of returning the hardcoded `0.0.1`. Resolves the version-reporting bug introduced in earlier releases.
+- **Release workflow hardened against trailing `npm publish` 403s.** `npm publish --provenance` occasionally returns a non-zero exit code after successfully writing to the registry and pushing the provenance attestation to sigstore's transparency log (race between the registry write and the CLI's internal verify check). The release workflow now treats the publish step's exit code as advisory and uses a follow-up `npm view solidscript@$VERSION version` query to determine the real outcome. If the version is on the registry, the workflow proceeds to create the GitHub Release. If it's genuinely missing, the workflow hard-fails. This was discovered while shipping v0.2.2 — the package published successfully but the workflow reported failure, requiring manual `gh release create` to finish the release. v0.2.3 is the first release shipped through the fully automated path.
+
 ## [0.2.2] - 2026-05-13
 
 ### Added

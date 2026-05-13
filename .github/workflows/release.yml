@@ -62,10 +62,28 @@ jobs:
           echo "tarball=$PWD/$TGZ" >> "$GITHUB_OUTPUT"
           echo "filename=$TGZ" >> "$GITHUB_OUTPUT"
 
+      # `npm publish --provenance` occasionally returns a trailing 403 after
+      # successfully writing to the registry + transparency log (race between
+      # the write and the CLI's internal verify). Treat the CLI exit code as
+      # advisory and use a follow-up `npm view` to determine real outcome.
       - name: publish to npm
+        id: publish
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public
+
+      - name: verify publish landed on registry
+        run: |
+          sleep 5
+          REF="${{ inputs.tag || github.ref_name }}"
+          VERSION="${REF#v}"
+          PUBLISHED=$(npm view "solidscript@$VERSION" version 2>/dev/null || echo "")
+          if [ "$PUBLISHED" != "$VERSION" ]; then
+            echo "::error::solidscript@$VERSION is NOT on the registry (npm view returned '$PUBLISHED'). Publish truly failed."
+            exit 1
+          fi
+          echo "✓ solidscript@$VERSION is live on https://registry.npmjs.org/"
 
       - name: create GitHub release
         env:

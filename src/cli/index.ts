@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
 import { Command } from "commander";
 import { parseCommand } from "./parse";
 import { buildCommand } from "./build";
@@ -26,11 +28,26 @@ try {
   if (cfg.plugins && cfg.plugins.length > 0) await loadPlugins(cfg.plugins);
 } catch { /* config issues are non-fatal at startup */ }
 
+function getSolidscriptVersion(): string {
+  try {
+    const here = path.dirname(new URL(import.meta.url).pathname);
+    for (const candidate of [
+      path.resolve(here, "..", "..", "package.json"),
+      path.resolve(here, "..", "package.json"),
+    ]) {
+      if (!fs.existsSync(candidate)) continue;
+      const pkg = JSON.parse(fs.readFileSync(candidate, "utf8"));
+      if (pkg.name === "solidscript" && typeof pkg.version === "string") return pkg.version;
+    }
+  } catch { /* fall through */ }
+  return "0.0.0";
+}
+
 const program = new Command();
 program
   .name("solidscript")
   .description("Write smart contracts in TypeScript. Ship Solidity.")
-  .version("0.0.1");
+  .version(getSolidscriptVersion());
 
 program
   .command("parse <input>")
