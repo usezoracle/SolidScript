@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: "npm"
+          # bun manages its own cache; setup-node's option needs package-lock.json which we don't ship
 
       - name: install deps
         run: bun install --frozen-lockfile
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          # bun manages its own cache; setup-node's option needs package-lock.json which we don't ship
 
       - run: bun install --frozen-lockfile
       - run: bun run build
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          # bun manages its own cache; setup-node's option needs package-lock.json which we don't ship
 
       - uses: actions/setup-python@v5
         with:
