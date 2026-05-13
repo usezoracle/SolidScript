@@ -1,6 +1,6 @@
 {
   "name": "solidscript",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Write smart contracts in TypeScript. Ship audited Solidity. Multi-chain deploy with a built-in 9-gate security pipeline.",
   "author": "Zoracle <labs@zoracle.xyz>",
   "homepage": "https://github.com/usezoracle/SolidScript#readme",
