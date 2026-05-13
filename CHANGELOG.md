@@ -4,6 +4,11 @@ All notable changes to SolidScript follow [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-05-13
+
+### Fixed
+- **Release workflow's "verify publish landed" step now retries with backoff** (up to ~90s, 18 attempts × 5s) instead of querying npm once after a fixed 5-second sleep. The npm CDN can take 30–60s to propagate a freshly-published version; v0.2.3's release workflow timed out at the verify step because of this lag, even though the publish itself succeeded. v0.2.4 is the first release that runs through Plan B end-to-end without manual intervention.
+
 ## [0.2.3] - 2026-05-13
 
 ### Fixed
