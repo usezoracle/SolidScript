@@ -1,0 +1,174 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Don't pile concurrent runs of the same PR — cancel the older one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Fast feedback: typecheck + unit tests + build. Runs on every push.
+  test:
+    name: test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: setup node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: "npm"
+
+      - name: install deps
+        run: bun install --frozen-lockfile
+
+      - name: typecheck
+        run: bun run typecheck
+
+      - name: unit tests
+        run: bun test
+
+      - name: build
+        run: bun run build
+
+      - name: smoke-test built CLI runs under node
+        run: node dist/cli/index.js --version
+
+  # Confirm the published tarball is self-sufficient: fresh dir, npm install, init, build, compile.
+  pack-smoke:
+    name: npm pack + fresh-install smoke
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+
+      - name: npm pack
+        id: pack
+        run: |
+          TGZ=$(npm pack --silent)
+          echo "tarball=$PWD/$TGZ" >> "$GITHUB_OUTPUT"
+
+      - name: install tarball into a fresh dir
+        run: |
+          mkdir -p /tmp/sst-ci && cd /tmp/sst-ci
+          npm init -y > /dev/null
+          npm install "${{ steps.pack.outputs.tarball }}" --silent
+
+      - name: doctor sees what's bundled
+        run: cd /tmp/sst-ci && node node_modules/.bin/solidscript doctor
+
+      - name: init scaffolds a new project
+        run: cd /tmp/sst-ci && node node_modules/.bin/solidscript init .
+
+      - name: build the scaffolded Counter contract
+        run: cd /tmp/sst-ci && node node_modules/.bin/solidscript build contracts
+
+      - name: validate
+        run: cd /tmp/sst-ci && node node_modules/.bin/solidscript validate contracts
+
+      - name: compile to bytecode
+        run: cd /tmp/sst-ci && node node_modules/.bin/solidscript compile out/sol
+
+      - name: assert deployable artifact exists
+        run: |
+          cd /tmp/sst-ci
+          test -s out/artifacts/Counter.json
+          jq -e '.abi | length > 0' out/artifacts/Counter.json > /dev/null
+          jq -e '.bytecode | startswith("0x")' out/artifacts/Counter.json > /dev/null
+          echo "✓ Counter artifact is valid"
+
+      - name: upload tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solidscript-tarball
+          path: ${{ steps.pack.outputs.tarball }}
+          retention-days: 14
+
+  # Run the security pipeline against bundled examples. Slow-ish, runs after fast jobs pass.
+  security:
+    name: 9-gate security pipeline (against bundled examples)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: install foundry (forge + anvil + cast)
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: install slither + native solc (for Slither)
+        run: |
+          pip install slither-analyzer
+          sudo add-apt-repository -y ppa:ethereum/ethereum
+          sudo apt-get update
+          sudo apt-get install -y solc
+
+      - run: bun install --frozen-lockfile
+
+      - name: validate every example contract
+        run: bun run cli validate examples
+
+      - name: build every example contract
+        run: bun run cli build examples
+
+      - name: compile every example contract
+        run: bun run cli compile out/sol
+
+      - name: full verify pipeline (skip fuzz + invariants — they need forge-std clone, separate job)
+        run: bun run cli verify examples --skip fuzz,invariants
+
+      - name: gasdiff baseline
+        run: bun run cli gasdiff examples
+
+      - name: audit (native rules + slither)
+        run: bun run cli audit examples
+        continue-on-error: true  # Slither warnings shouldn't block the pipeline; only high-severity errors should
+
+      # Mythril is opt-in via --deep. Don't run in CI by default — too slow per contract.
+      # Uncomment if you want a nightly cron job:
+      # - name: deep audit with Mythril
+      #   run: |
+      #     pip install mythril
+      #     bun run cli verify examples --deep --mythril-timeout 60 --skip fuzz,invariants

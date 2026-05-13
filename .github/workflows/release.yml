@@ -1,0 +1,78 @@
+name: Release
+
+# Triggered when a maintainer pushes a v* tag (e.g. `git tag v0.2.1 && git push --tags`).
+# Builds, packs, publishes to npm, and uploads the tarball as a GitHub Release asset.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v0.2.1)"
+        required: true
+
+jobs:
+  publish:
+    name: publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # for GitHub Release creation
+      id-token: write       # for npm provenance (if NPM_TOKEN supports it)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: install deps
+        run: bun install --frozen-lockfile
+
+      - name: typecheck
+        run: bun run typecheck
+
+      - name: unit tests
+        run: bun test
+
+      - name: build
+        run: bun run build
+
+      - name: verify version matches tag
+        run: |
+          PKG_VERSION=$(jq -r .version package.json)
+          REF="${{ inputs.tag || github.ref_name }}"
+          TAG_VERSION="${REF#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::package.json version ($PKG_VERSION) doesn't match tag ($TAG_VERSION)"
+            exit 1
+          fi
+          echo "✓ version $PKG_VERSION matches tag $REF"
+
+      - name: pack
+        id: pack
+        run: |
+          TGZ=$(npm pack --silent)
+          echo "tarball=$PWD/$TGZ" >> "$GITHUB_OUTPUT"
+          echo "filename=$TGZ" >> "$GITHUB_OUTPUT"
+
+      - name: publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+      - name: create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REF="${{ inputs.tag || github.ref_name }}"
+          gh release create "$REF" \
+            --title "$REF" \
+            --generate-notes \
+            "${{ steps.pack.outputs.tarball }}"
