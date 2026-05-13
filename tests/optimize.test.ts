@@ -23,7 +23,7 @@ describe("optimizer — mutating passes", () => {
   });
 
   it("custom-errors converts `require(x, \"msg\")` to revert", () => {
-    const { program } = parseContractFiles([path.join(ROOT, "tests/fixtures/RequireToError.ts")]);
+    const { program } = parseContractFiles([path.join(ROOT, "tests/contracts/RequireToError.ts")]);
     optimizeProgram(program);
     const c = program.contracts[0]!;
     expect(c.errors.length).toBeGreaterThanOrEqual(1);

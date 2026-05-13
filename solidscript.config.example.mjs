@@ -1,6 +1,5 @@
-import type { Config } from "./src/config/schema";
-
-const config: Config = {
+/** @type {import("solidscript").Config} */
+const config = {
   compiler: {
     version: "0.8.20",
     optimizer: { enabled: true, runs: 200 },
@@ -11,13 +10,17 @@ const config: Config = {
       chainId: 31337,
       privateKeyEnv: "ANVIL_PRIVATE_KEY",
     },
-    sepolia: {
-      rpcUrl: "https://rpc.sepolia.org",
-      chainId: 11155111,
-      privateKeyEnv: "SEPOLIA_PRIVATE_KEY",
+    "base-sepolia": {
+      rpcUrl: "https://sepolia.base.org",
+      chainId: 84532,
+    },
+    base: {
+      rpcUrl: "https://mainnet.base.org",
+      chainId: 8453,
     },
   },
   outDir: "out",
+  plugins: [],
 };
 
 export default config;

@@ -55,7 +55,7 @@ npx solidscript init                              # scaffold contracts/ + config
 
 # write your contract in contracts/Counter.ts
 npx solidscript build contracts                   # TS → Solidity
-npx solidscript verify contracts --skip fuzz      # 8-gate security pipeline
+npx solidscript verify contracts --skip fuzz      # 9-gate security pipeline
 npx solidscript compile out/sol                   # ABI + bytecode
 
 # deploy via your browser wallet (no keys on disk)
@@ -64,7 +64,7 @@ npx solidscript deploy Counter -n base-sepolia
 
 ## What makes this different
 
-- **8-gate security pipeline gates every deploy** — native validator (secure mode), solc, SMTChecker (Z3), Slither, pattern library, auto-generated fuzz harnesses, auto-derived invariant tests, reproducible-build attestation
+- **9-gate security pipeline gates every deploy** — native validator (secure mode), solc, SMTChecker (Z3), Slither, pattern library, auto-generated fuzz harnesses, auto-derived invariant tests, reproducible-build attestation
 - **Browser-wallet signing first-class** — no private keys on disk; MetaMask/Rabby/Coinbase Wallet handles the signature
 - **Auto-verify on every Etherscan-family explorer** — Base, Optimism, Arbitrum, Polygon, Eth, every testnet — one API key via Etherscan v2 multichain
 - **OpenZeppelin v5 + 13 optimizer passes built in** — custom errors auto-derived, `Ownable(msg.sender)` auto-injected, immutables auto-detected
@@ -85,10 +85,10 @@ npx solidscript deploy Counter -n base-sepolia
 | `solidscript init [dir]` | Scaffold a new project (contracts/, config, scripts) |
 | `solidscript build <input>` | Transpile TS → Solidity (optimizer on by default) |
 | `solidscript validate <input>` | Static checks (15 native rules) |
-| `solidscript verify <input>` | Full 8-gate security pipeline |
+| `solidscript verify <input>` | Full 9-gate security pipeline |
 | `solidscript compile <input>` | solc compile → ABI + bytecode |
 | `solidscript deploy <Contract> -n <network>` | Deploy (browser wallet by default, auto-verifies on Etherscan if key configured) |
-| `solidscript secure-deploy <input> -c <Contract> -n <network>` | Refuse to deploy unless 8 gates pass |
+| `solidscript secure-deploy <input> -c <Contract> -n <network>` | Refuse to deploy unless 9 gates pass |
 | `solidscript verify-source <Contract> -n <network>` | Submit source to Etherscan v2 multichain |
 | `solidscript audit <input>` | Native rules + Slither |
 | `solidscript audit-pack <input>` | Per-contract bundle for auditor handoff |

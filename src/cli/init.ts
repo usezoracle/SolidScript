@@ -114,7 +114,7 @@ export async function initCommand(dir: string): Promise<void> {
   console.log("  npx solidscript build contracts      # transpile → out/sol/");
   console.log("  npx solidscript deploy Counter -n base-sepolia");
   console.log("");
-  console.log(pc.dim("For full docs: https://github.com/yourorg/solidscript/blob/main/docs/details.md"));
+  console.log(pc.dim("For full docs: https://github.com/usezoracle/SolidScript/blob/main/docs/details.md"));
 }
 
 function writeIfMissing(p: string, content: string): void {

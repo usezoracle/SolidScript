@@ -1,7 +1,7 @@
 # SolidScript — full documentation
 
 > **Write smart contracts in TypeScript. Ship audited Solidity.**
-> A transpiler + 8-gate security pipeline + multi-chain deployer, in one package.
+> A transpiler + 9-gate security pipeline + multi-chain deployer, in one package.
 
 This document is written for a TypeScript developer who has **never written Solidity before**. By the end, you'll have a token deployed on Base Sepolia, source-verified on BaseScan, with a reproducible-build manifest in your repo.
 
@@ -16,7 +16,7 @@ This document is written for a TypeScript developer who has **never written Soli
 5. [Decorators reference](#5-decorators-reference)
 6. [Type mapping (TypeScript → Solidity)](#6-type-mapping)
 7. [Every command, with examples](#7-commands)
-8. [The 8-gate security pipeline](#8-the-8-gate-security-pipeline)
+8. [The 9-gate security pipeline](#8-the-9-gate-security-pipeline)
 9. [Browser-wallet flow — why no private keys on disk](#9-browser-wallet-flow)
 10. [Multi-chain deploy](#10-multi-chain-deploy)
 11. [Source verification on block explorers](#11-source-verification)
@@ -354,7 +354,7 @@ Runs solc on `.sol` files. Writes `out/artifacts/<Contract>.json` (ABI + bytecod
 
 ### `verify <input>`
 
-The 8-gate security pipeline. Runs in order:
+The 9-gate security pipeline. Runs in order:
 
 1. Native validator (secure mode)
 2. solc compile
@@ -393,7 +393,7 @@ npx solidscript deploy MyToken -n base-sepolia --no-verify
 
 ### `secure-deploy <input> -c <Contract> -n <network>`
 
-Full pipeline: runs `verify` (all 8 gates), refuses to deploy unless every gate passes, then deploys. Designed for production where deploy without prior verification is unacceptable.
+Full pipeline: runs `verify` (all 9 gates), refuses to deploy unless every gate passes, then deploys. Designed for production where deploy without prior verification is unacceptable.
 
 ### `verify-source <Contract> -n <network>`
 
