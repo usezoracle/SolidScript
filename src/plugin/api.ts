@@ -1,0 +1,41 @@
+import type { IRContract } from "../ir/types";
+import type { OptimizationChange } from "../optimizer/passes";
+import type { Diagnostic } from "../validator/diagnostics";
+
+export type PluginOptimizerPass = {
+  name: string;
+  run: (contract: IRContract) => OptimizationChange[];
+};
+
+export type PluginValidatorRule = {
+  name: string;
+  run: (contract: IRContract) => Diagnostic[];
+};
+
+export interface SolidScriptPlugin {
+  name: string;
+  optimizerPasses?: PluginOptimizerPass[];
+  validatorRules?: PluginValidatorRule[];
+}
+
+export interface PluginRegistry {
+  plugins: SolidScriptPlugin[];
+}
+
+let _registry: PluginRegistry = { plugins: [] };
+
+export function setPluginRegistry(reg: PluginRegistry): void {
+  _registry = reg;
+}
+
+export function getPluginRegistry(): PluginRegistry {
+  return _registry;
+}
+
+export function getPluginOptimizerPasses(): PluginOptimizerPass[] {
+  return _registry.plugins.flatMap((p) => p.optimizerPasses ?? []);
+}
+
+export function getPluginValidatorRules(): PluginValidatorRule[] {
+  return _registry.plugins.flatMap((p) => p.validatorRules ?? []);
+}

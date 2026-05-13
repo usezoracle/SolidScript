@@ -1,0 +1,270 @@
+# Auto-generated from commander introspection — do not edit by hand
+# Generated: 2026-05-12T21:02:30.876Z
+version: 0.1.0
+commands:
+  - name: parse
+    description: Parse TypeScript contract(s) to IR JSON
+    arguments:
+      - name: input
+        required: true
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+  - name: build
+    description: Transpile TypeScript contract(s) to
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: "-o, --out <dir>"
+        description: "output directory (default: \"out/sol\")"
+      - flag: --no-optimize
+        description: skip optimizer passes
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript build contracts
+      - solidscript build contracts --no-optimize
+  - name: validate
+    description: Run static checks on contract(s)
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: --secure
+        description: escalate footgun warnings to errors unless explicitly allowed
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript validate contracts
+      - solidscript validate contracts --secure
+  - name: optimize
+    description: Report gas optimization suggestions
+    arguments:
+      - name: input
+        required: true
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+  - name: compile
+    description: Compile .sol files to ABI + bytecode
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: "-o, --out <dir>"
+        description: artifacts directory
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript compile out/sol
+  - name: deploy
+    description: Deploy a compiled artifact (auto-uses
+    arguments:
+      - name: options
+        required: false
+      - name: contract
+        required: true
+    options:
+      - flag: "-n, --network <name>"
+        description: "network: anvil | base-sepolia | base | sepolia |"
+      - flag: "-a, --args <args...>"
+        description: "constructor arguments (default: [])"
+      - flag: "-w, --wallet <name>"
+        description: use a named hot wallet from ~/.solidscript/wallets/
+      - flag: --no-browser
+        description: force a hot wallet (requires --wallet) — disables
+      - flag: --no-verify
+        description: skip auto-verify on Etherscan even when etherscan-key
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript deploy Counter -n anvil
+      - solidscript deploy MyToken -n base-sepolia -a 1000000
+      - solidscript deploy MyToken -n base --no-verify --wallet prod
+  - name: verify-source
+    description: Submit source to Etherscan (v2
+    arguments:
+      - name: options
+        required: false
+      - name: contract
+        required: true
+    options:
+      - flag: "-n, --network <name>"
+        description: network name
+      - flag: "--address <addr>"
+        description: deployed contract address (otherwise read from
+      - flag: "-a, --args <args...>"
+        description: constructor arguments used at deploy (otherwise read
+      - flag: "--api-key <key>"
+        description: Etherscan API key (otherwise read ETHERSCAN_API_KEY
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript verify-source MyToken -n base-sepolia
+  - name: config
+    description: Manage user-level config
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+  - name: wallet
+    description: Manage local hot wallets
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+  - name: init
+    description: Scaffold a new SolidScript project
+    arguments:
+      - name: dir
+        required: false
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript init my-app
+      - solidscript init .
+  - name: doctor
+    description: "Check environment: node, bun, solc,"
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript doctor
+  - name: gasdiff
+    description: "Compare bytecode size: unoptimized vs"
+    arguments:
+      - name: input
+        required: true
+    options:
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript gasdiff contracts
+  - name: audit
+    description: Run native rules + Slither static
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: --strict
+        description: exit nonzero on any finding
+      - flag: "-o, --out <dir>"
+        description: "where .sol artifacts live (default: out/sol)"
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript audit contracts
+  - name: audit-pack
+    description: Emit per-contract audit pack (TS + Sol +
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: "-o, --out <dir>"
+        description: "audit output root (default: out/audit)"
+      - flag: --no-zip
+        description: skip the .zip step; write the directory only
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript audit-pack contracts
+  - name: trace
+    description: Rewrite forge/solc stack traces to use TS
+    arguments:
+      - name: options
+        required: false
+    options:
+      - flag: "-i, --input <file>"
+        description: trace text input file (otherwise reads stdin)
+      - flag: "--sourcemap-dir <dir>"
+        description: "where to find <Contract>.sourcemap.json (default:"
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - "forge test 2>&1 | solidscript trace"
+  - name: test
+    description: Transpile .t.ts tests to .t.sol and run
+    arguments:
+      - name: options
+        required: false
+    options:
+      - flag: "-p, --pattern <pattern>"
+        description: forge --match-test pattern
+      - flag: "--tests <dir>"
+        description: "test source dir (default: tests/contracts)"
+      - flag: "--contracts <dir>"
+        description: "contract source dir (default: examples)"
+      - flag: "--root <dir>"
+        description: "forge project root (default: out/forge)"
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript test
+      - solidscript test -p testFuzz
+  - name: verify
+    description: Run the 8-gate security verification
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: "--skip <gates>"
+        description: "comma-separated gates to skip: fuzz, smt, slither,"
+      - flag: "--fuzz-runs <n>"
+        description: forge fuzz iterations per method (default 1000)
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript verify contracts
+      - "solidscript verify contracts --skip fuzz,invariants"
+  - name: secure-deploy
+    description: Run verification gates THEN deploy
+    arguments:
+      - name: options
+        required: false
+      - name: input
+        required: true
+    options:
+      - flag: "-c, --contract <name>"
+        description: contract name to deploy after verification
+      - flag: "-n, --network <name>"
+        description: network name
+      - flag: "-a, --args <args...>"
+        description: "constructor arguments (default: [])"
+      - flag: "--artifacts <dir>"
+        description: artifacts directory
+      - flag: --no-fuzz
+        description: skip auto-generated fuzz harnesses
+      - flag: --no-smt
+        description: skip SMTChecker
+      - flag: --no-slither
+        description: skip Slither
+      - flag: --no-invariants
+        description: skip invariant tests
+      - flag: --no-patterns
+        description: skip pattern library check
+      - flag: "-h, --help"
+        description: display help for command
+    examples:
+      - solidscript secure-deploy contracts -c Counter -n base-sepolia
+  - name: help
+    description: display help for command
+    arguments:
+      - name: command
+        required: false
+    options:
+      - flag: "-V, --version"
+        description: output the version number
+      - flag: "-h, --help"
+        description: display help for command

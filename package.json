@@ -1,0 +1,81 @@
+{
+  "name": "solidscript",
+  "version": "0.2.0",
+  "description": "Write smart contracts in TypeScript. Ship audited Solidity. Multi-chain deploy with a built-in 8-gate security pipeline.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "solidscript": "dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./standards": {
+      "types": "./types/standards.d.ts"
+    },
+    "./types": {
+      "types": "./types/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "types/",
+    "README.md",
+    "LICENSE",
+    "docs/"
+  ],
+  "keywords": [
+    "solidity",
+    "typescript",
+    "transpiler",
+    "smart-contracts",
+    "ethereum",
+    "evm",
+    "base",
+    "optimism",
+    "arbitrary",
+    "security",
+    "slither",
+    "fuzz",
+    "audit"
+  ],
+  "scripts": {
+    "cli": "bun run src/cli/index.ts",
+    "build": "bun run scripts/build.ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run build",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "docs:typedoc": "typedoc src/index.ts --out docs/api --excludePrivate",
+    "docs:cli": "bun run scripts/gen-cli-manifest.ts > docs/cli-commands.yaml"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "commander": "^12.1.0",
+    "picocolors": "^1.1.1",
+    "solc": "^0.8.28",
+    "typescript": "^5.6.3",
+    "viem": "^2.21.45",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "bun-types": "^1.1.38",
+    "typedoc": "^0.27.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourorg/solidscript.git"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
