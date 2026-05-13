@@ -15,10 +15,6 @@ import path from "node:path";
 import os from "node:os";
 import https from "node:https";
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { pipeline } from "node:stream/promises";
-import { createGunzip } from "node:zlib";
-import { extract as tarExtract } from "node:zlib";
 
 const BIN_DIR = path.join(os.homedir(), ".solidscript", "bin");
 
@@ -116,6 +112,39 @@ async function downloadAndExtractFoundry(): Promise<void> {
   process.stderr.write(`[solidscript] installed: ${asset.binaries.filter((b) => fs.existsSync(path.join(BIN_DIR, b))).join(", ")}\n`);
 }
 
+function pipxInstalled(): boolean {
+  const r = spawnSync("pipx", ["--version"], { encoding: "utf8" });
+  return r.status === 0;
+}
+
+function tryPipxInstall(pkg: string, binName: string): string | null {
+  process.stderr.write(`[solidscript] running 'pipx install ${pkg}' (one-time, ~1-2 minutes)…\n`);
+  const r = spawnSync("pipx", ["install", pkg], { encoding: "utf8" });
+  if (r.status !== 0) {
+    const err = (r.stderr || r.stdout || "").trim().split("\n").slice(-3).join("\n");
+    process.stderr.write(`[solidscript] pipx install ${pkg} failed:\n  ${err}\n`);
+    return null;
+  }
+  const candidates = [
+    path.join(os.homedir(), ".local", "bin", binName),
+    "/opt/homebrew/bin/" + binName,
+    "/usr/local/bin/" + binName,
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) {
+      process.stderr.write(`[solidscript] installed: ${c}\n`);
+      return c;
+    }
+  }
+  const onPath = whichOnPath(binName);
+  if (onPath) {
+    process.stderr.write(`[solidscript] installed: ${onPath}\n`);
+    return onPath;
+  }
+  process.stderr.write(`[solidscript] ${pkg} pipx install reported success but ${binName} binary not found; check ~/.local/bin\n`);
+  return null;
+}
+
 function downloadFile(url: string, dest: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
@@ -169,7 +198,11 @@ export async function resolveTool(name: "forge" | "anvil" | "cast" | "chisel" | 
         description: `docker:${image}`,
       };
     }
-    throw new Error("slither not available: install via `brew install slither-analyzer` or install Docker so we can run trailofbits/eth-security-toolbox");
+    if (pipxInstalled()) {
+      const installed = tryPipxInstall("slither-analyzer", "slither");
+      if (installed) return { cmd: installed, argPrefix: [], via: "pipx", description: installed };
+    }
+    throw new Error("slither not available: install Docker (recommended), or install pipx then re-run `solidscript doctor --fix`, or `brew install slither-analyzer`");
   }
 
   if (name === "myth") {
@@ -189,7 +222,11 @@ export async function resolveTool(name: "forge" | "anvil" | "cast" | "chisel" | 
         description: `docker:${image}`,
       };
     }
-    throw new Error("mythril not available: install via `pipx install mythril` or install Docker so we can run mythril/myth");
+    if (pipxInstalled()) {
+      const installed = tryPipxInstall("mythril", "myth");
+      if (installed) return { cmd: installed, argPrefix: [], via: "pipx", description: installed };
+    }
+    throw new Error("mythril not available: install Docker (recommended), or install pipx then re-run `solidscript doctor --fix`, or `pipx install mythril`");
   }
 
   throw new Error(`unknown tool: ${name}`);
@@ -212,7 +249,10 @@ export function toolStatus(name: "forge" | "anvil" | "slither" | "myth"): { ok: 
       if (dockerImagePresent(image)) return { ok: true, via: `docker:${image}` };
       return { ok: false, hint: `Docker present; run \`solidscript doctor --fix\` to pull ${image}` };
     }
-    return { ok: false, hint: `install Docker (recommended) OR \`${name === "slither" ? "brew install slither-analyzer" : "pipx install mythril"}\`` };
+    if (pipxInstalled()) {
+      return { ok: false, hint: `pipx present; run \`solidscript doctor --fix\` to install ${name === "slither" ? "slither-analyzer" : "mythril"} via pipx` };
+    }
+    return { ok: false, hint: `install Docker, or install pipx (\`brew install pipx\`), then \`solidscript doctor --fix\`` };
   }
   return { ok: false };
 }

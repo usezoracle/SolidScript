@@ -4,6 +4,18 @@ All notable changes to SolidScript follow [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-05-13
+
+### Added
+- **Auto-pipx fallback** for Slither and Mythril in `solidscript doctor --fix`. Resolution order is now `PATH → Docker → pipx install`. When `pipx` is present and neither a native binary nor a Docker image is available, doctor automatically runs `pipx install slither-analyzer` / `pipx install mythril` instead of just printing the install hint.
+- `solidscript doctor` (no `--fix`) now distinguishes between "Docker present" and "pipx present" in its hint text, so users see the exact path that will be tried.
+
+### Fixed
+- Removed dead `extract as tarExtract` import from `src/runtime/tool-paths.ts` that was producing a TypeScript declaration emit warning during build.
+
+### Verified
+- First release through the Plan B CI/CD workflow (GitHub Actions: tag push → `bun run build` → `npm publish --provenance --access public` → GitHub Release with tarball). 0.2.1 was the last manual publish.
+
 ## [0.2.1] - 2026-05-13
 
 ### Changed
